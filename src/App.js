@@ -2,11 +2,8 @@ import React, { Component } from "react"
 import "./App.css"
 import firebase from "./services/Firebase/firebase"
 import firebaseUiConfig from "./services/Firebase/firebaseUiConf"
-import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth"
 import { Router, navigate } from "@reach/router"
 import { v1 as uuid } from "uuid"
-
-import { FaList } from "react-icons/fa"
 
 import Home from "./components/Home/Home"
 import Login from "./components/Login/Login"
@@ -39,7 +36,7 @@ class App extends Component {
 	toggleTodoCompletion = (evt, todoId) => {
 		let updatedTodos = this.state.todos.map(todo => {
 			if (todo.id === todoId) {
-				todo.done = evt.target.checked
+				todo.done = !todo.done
 			}
 			return todo
 		})

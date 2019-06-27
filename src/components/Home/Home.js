@@ -1,6 +1,6 @@
 import React from "react"
 import { FaList } from "react-icons/fa"
-import { Router, navigate } from "@reach/router"
+import { navigate } from "@reach/router"
 
 const Home = (props) => {
 	return (
