@@ -1,23 +1,39 @@
 import React, { Component } from "react"
 import "./App.css"
-import Todo from "./components/Todo/Todo.js"
-
+import firebase from "./services/Firebase/firebase"
+import firebaseUiConfig from "./services/Firebase/firebaseUiConf"
+import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth"
 import { Router, navigate } from "@reach/router"
 import { v1 as uuid } from "uuid"
 
+import { FaList } from "react-icons/fa"
+
+import Home from "./components/Home/Home"
+import Login from "./components/Login/Login"
+import Todo from "./components/Todo/Todo.js"
+
 class App extends Component {
 	state = {
-		todos: []
+		todos: [],
+		user: false
 	}
 
-	todoLead = () => {
-		const todosLength = this.state.todos.length
-		return (
-			<small className="text-secondary">
-				You have {todosLength > 1 || todosLength === 0 ? todosLength + " tasks " : todosLength + " task "}
-				today.
-			</small>
-		)
+	componentDidMount = () => {
+		firebase.auth().onAuthStateChanged(user => {
+			console.log(user)
+			if (firebase.auth().currentUser) {
+				let u = firebase.auth().currentUser
+				var currentUser = {
+					displayName: u.displayName,
+					email: u.email,
+					photoURL: u.photoURL,
+					uid: u.uid
+				}
+
+				this.setState({ user: currentUser })
+				navigate("/todos")
+			}
+		})
 	}
 
 	toggleTodoCompletion = (evt, todoId) => {
@@ -46,24 +62,35 @@ class App extends Component {
 		this.setState({ todos: updatedTodos })
 	}
 
+	logOut = async () => {
+		navigate("/")
+		await firebase.auth().signOut()
+		this.setState({ user: null })
+	}
+
 	render() {
 		return (
 			<div className="App">
-				<h1 className="App-title bg-dark text-light pb-3 pt-2 text-center">To Do</h1>
-				<div className="container">
-					<header className="mb-3">
-						<h1>Today</h1>
-						{this.todoLead()}
-					</header>
-					<section>
-						<Todo
-							todos={this.state.todos}
-							toggleTodoCompletion={this.toggleTodoCompletion}
-							deleteTodo={this.deleteTodo}
-							addTodo={this.addTodo}
-						/>
-					</section>
+				<div className="d-flex justify-content-between bg-dark mb-5 px-2">
+					<h1 className="text-light pb-1 pt-2 text-center ml-2">YATOP</h1>
+					{this.state.user && (
+						<button className="btn btn-primary my-3" onClick={() => this.logOut()}>
+							Log out
+						</button>
+					)}
 				</div>
+				<Router className="container">
+					<Home path="/" />
+					<Login path="/login" firebaseUiConfig={firebaseUiConfig} firebaseAuth={firebase.auth} />
+					<Todo
+						path="/todos"
+						todos={this.state.todos}
+						toggleTodoCompletion={this.toggleTodoCompletion}
+						deleteTodo={this.deleteTodo}
+						addTodo={this.addTodo}
+						user={this.state.user}
+					/>
+				</Router>
 			</div>
 		)
 	}
