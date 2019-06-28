@@ -1,3 +1,9 @@
-.App {
+body, html, #root, .fillRemainingHeight {
+    height: 100%;
+}
 
+.flexCenterAll {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

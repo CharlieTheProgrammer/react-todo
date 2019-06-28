@@ -8,6 +8,7 @@ import { v1 as uuid } from "uuid"
 import Home from "./components/Home/Home"
 import Login from "./components/Login/Login"
 import Todo from "./components/Todo/Todo.js"
+import Layout from "./components/Layout/Layout"
 
 class App extends Component {
 	state = {
@@ -67,16 +68,8 @@ class App extends Component {
 
 	render() {
 		return (
-			<div className="App">
-				<div className="d-flex justify-content-between bg-dark mb-5 px-2">
-					<h1 className="text-light pb-1 pt-2 text-center ml-2">YATOP</h1>
-					{this.state.user && (
-						<button className="btn btn-primary my-3" onClick={() => this.logOut()}>
-							Log out
-						</button>
-					)}
-				</div>
-				<Router className="container">
+			<Layout user={this.state.user} logOut={this.logOut}>
+				<Router className="d-flex flex-column flex-grow-1">
 					<Home path="/" />
 					<Login path="/login" firebaseUiConfig={firebaseUiConfig} firebaseAuth={firebase.auth} />
 					<Todo
@@ -88,7 +81,7 @@ class App extends Component {
 						user={this.state.user}
 					/>
 				</Router>
-			</div>
+			</Layout>
 		)
 	}
 }
