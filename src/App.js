@@ -11,10 +11,12 @@ import Home from "./components/Home/Home"
 import Login from "./components/Login/Login"
 import Todos from "./components/Todos/Todos.js"
 import Layout from "./components/Layout/Layout"
+import Lists from './components/Lists/Lists'
 
 class App extends Component {
 	state = {
 		todos: [],
+		lists: [],
 		user: false
 	}
 
@@ -30,8 +32,8 @@ class App extends Component {
 				}
 				this.setState({ user: currentUser })
 
-				let ref = db.collection('todos').doc(`${this.state.user.uid}`)
-				ref.onSnapshot(snapShot => {
+				let todosRef = db.collection('todos').doc(`${this.state.user.uid}`)
+				todosRef.onSnapshot(snapShot => {
 					let data = snapShot.data()
 					let todos = []
 					if (data) {
@@ -42,17 +44,25 @@ class App extends Component {
 					}
 				})
 
-				navigate("/todos")
+				let listsRef = db.collection('lists').doc(`${this.state.user.uid}`)
+				listsRef.onSnapshot(snapShot => {
+					let data = snapShot.data()
+					let lists = []
+					if (data) {
+						for (let key in data) {
+							lists.push(data[key])
+						}
+						this.setState({ lists })
+					}
+				})
+
+				//navigate("/todos")
 			}
 		})
 	}
 
 	toggleTodoCompletion = (evt, todoId) => {
-		let todo = this.state.todos.filter(todo => {
-			if (todo.id === todoId) {
-				return todo
-			}
-		})
+		let todo = this.state.todos.filter(todo => todo.id === todoId ? todo : false)
 		todo[0].done = !todo[0].done
 		let ref = db.collection('todos').doc(`${this.state.user.uid}`)
 		ref.set({
@@ -61,11 +71,7 @@ class App extends Component {
 	}
 
 	editTodoDescription = (todoId, description) => {
-		let todo = this.state.todos.filter(todo => {
-			if (todo.id === todoId) {
-				return todo
-			}
-		})
+		let todo = this.state.todos.filter(todo => todo.id === todoId ? todo : false)
 		todo[0].description = description
 
 		let ref = db.collection('todos').doc(`${this.state.user.uid}`)
@@ -80,8 +86,6 @@ class App extends Component {
 			description,
 			done: false
 		}
-		let updatedTodos = [...this.state.todos]
-		updatedTodos.push(todo)
 
 		let ref = db.collection('todos').doc(`${this.state.user.uid}`)
 		ref.set({
@@ -102,6 +106,40 @@ class App extends Component {
 		this.setState({ user: null })
 	}
 
+	editListName = (listId, listName) => {
+		let list = this.state.lists.filter(list => list.id === listId ? list : false)
+		list[0].name = listName
+
+		let ref = db.collection('lists').doc(`${this.state.user.uid}`)
+		ref.set({
+			[listId]: list[0]
+		}, { merge: true })
+	}
+
+	addList = evt => {
+		if (evt.target.value === '') {
+			return
+		}
+
+		let list = {
+			id: uuid(),
+			name: evt.target.value
+		}
+		let lists = [...this.state.lists, list]
+
+		let ref = db.collection('lists').doc(`${this.state.user.uid}`)
+		ref.set({
+			[list.id]: list
+		}, { merge: true })
+	}
+
+	deleteList = listId => {
+		let ref = db.collection('lists').doc(`${this.state.user.uid}`)
+		ref.update({
+			[listId]: firebase.firestore.FieldValue.delete()
+		})
+	}
+
 	render() {
 		return (
 			<Layout user={this.state.user} logOut={this.logOut}>
@@ -117,6 +155,13 @@ class App extends Component {
 						addTodo={this.addTodo}
 						user={this.state.user}
 					/>
+					<Lists
+						path='/lists'
+						lists={this.state.lists}
+						addList={this.addList}
+						editListName={this.editListName}
+						deleteList={this.deleteList}
+					></Lists>
 				</Router>
 			</Layout>
 		)
