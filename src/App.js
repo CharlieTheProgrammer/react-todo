@@ -2,6 +2,8 @@ import React, { Component } from "react"
 import "./App.css"
 import firebase from "./services/Firebase/firebase"
 import firebaseUiConfig from "./services/Firebase/firebaseUiConf"
+import db from './services/Firebase/firestore'
+
 import { Router, navigate } from "@reach/router"
 import { v1 as uuid } from "uuid"
 
@@ -18,7 +20,6 @@ class App extends Component {
 
 	componentDidMount = () => {
 		firebase.auth().onAuthStateChanged(user => {
-			console.log(user)
 			if (firebase.auth().currentUser) {
 				let u = firebase.auth().currentUser
 				var currentUser = {
@@ -27,21 +28,50 @@ class App extends Component {
 					photoURL: u.photoURL,
 					uid: u.uid
 				}
-
 				this.setState({ user: currentUser })
+
+				let ref = db.collection('todos').doc(`${this.state.user.uid}`)
+				ref.onSnapshot(snapShot => {
+					let data = snapShot.data()
+					let todos = []
+					if (data) {
+						for (let key in data) {
+							todos.push(data[key])
+						}
+						this.setState({ todos })
+					}
+				})
+
 				navigate("/todos")
 			}
 		})
 	}
 
 	toggleTodoCompletion = (evt, todoId) => {
-		let updatedTodos = this.state.todos.map(todo => {
+		let todo = this.state.todos.filter(todo => {
 			if (todo.id === todoId) {
-				todo.done = !todo.done
+				return todo
 			}
-			return todo
 		})
-		this.setState({ todos: updatedTodos })
+		todo[0].done = !todo[0].done
+		let ref = db.collection('todos').doc(`${this.state.user.uid}`)
+		ref.set({
+			[todoId]: todo[0]
+		}, { merge: true })
+	}
+
+	editTodoDescription = (todoId, description) => {
+		let todo = this.state.todos.filter(todo => {
+			if (todo.id === todoId) {
+				return todo
+			}
+		})
+		todo[0].description = description
+
+		let ref = db.collection('todos').doc(`${this.state.user.uid}`)
+		ref.set({
+			[todoId]: todo[0]
+		}, { merge: true })
 	}
 
 	addTodo = description => {
@@ -52,12 +82,18 @@ class App extends Component {
 		}
 		let updatedTodos = [...this.state.todos]
 		updatedTodos.push(todo)
-		this.setState({ todos: updatedTodos })
+
+		let ref = db.collection('todos').doc(`${this.state.user.uid}`)
+		ref.set({
+			[todo.id]: todo
+		}, { merge: true })
 	}
 
 	deleteTodo = todoId => {
-		let updatedTodos = this.state.todos.filter(todo => todo.id !== todoId)
-		this.setState({ todos: updatedTodos })
+		let ref = db.collection('todos').doc(`${this.state.user.uid}`)
+		ref.update({
+			[todoId]: firebase.firestore.FieldValue.delete()
+		})
 	}
 
 	logOut = async () => {
@@ -76,6 +112,7 @@ class App extends Component {
 						path="/todos"
 						todos={this.state.todos}
 						toggleTodoCompletion={this.toggleTodoCompletion}
+						editTodoDescription={this.editTodoDescription}
 						deleteTodo={this.deleteTodo}
 						addTodo={this.addTodo}
 						user={this.state.user}

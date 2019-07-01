@@ -36,6 +36,7 @@ const Todo = (props) => {
                                     <TodoItem
                                         todo={todo}
                                         toggleTodoCompletion={props.toggleTodoCompletion}
+                                        editTodoDescription={props.editTodoDescription}
                                         deleteTodo={props.deleteTodo}
                                         key={todo.id}
                                     ></TodoItem>

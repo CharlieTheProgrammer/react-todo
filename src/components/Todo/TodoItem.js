@@ -9,24 +9,35 @@ const TodoItem = props => {
 	}
 
 	let descriptionHtml = todo.done ? (
-		<span contentEditable="true" style={strikeThrough} suppressContentEditableWarning="true">
+		<div
+			contentEditable
+			suppressContentEditableWarning
+			style={strikeThrough}
+			onBlur={evt => props.editTodoDescription(todo.id, evt.target.innerText)}
+		>
 			{todo.description}
-		</span>
+		</div>
 	) : (
-		<span contentEditable="true" suppressContentEditableWarning="true">
+		<div
+			contentEditable
+			suppressContentEditableWarning
+			onBlur={evt => props.editTodoDescription(todo.id, evt.target.innerText)}
+		>
 			{todo.description}
-		</span>
+		</div>
 	)
 
 	return (
 		<ul className="list-group list-group-horizontal my-2">
-			<li className="list-group-item w-100">
-				{todo.done ? (
-					<FaRegCheckSquare size="1.25rem" className="mr-2" onClick={evt => props.toggleTodoCompletion(evt, todo.id)} />
-				) : (
-					<FaRegSquare size="1.25rem" className="mr-2" onClick={evt => props.toggleTodoCompletion(evt, todo.id)} />
-				)}
-				{descriptionHtml}
+			<li className="list-group-item w-100 d-flex">
+				<div className="">
+					{todo.done ? (
+						<FaRegCheckSquare size="1.25rem" className="mr-2" onClick={evt => props.toggleTodoCompletion(evt, todo.id)} />
+					) : (
+						<FaRegSquare size="1.25rem" className="mr-2" onClick={evt => props.toggleTodoCompletion(evt, todo.id)} />
+					)}
+				</div>
+				<div className="flex-grow-1">{descriptionHtml}</div>
 			</li>
 			<li
 				className="list-group-item border"
