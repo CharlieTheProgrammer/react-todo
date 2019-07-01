@@ -1,5 +1,5 @@
 import React from "react"
-import TodoAddItem from './TodoAddItem'
+import TodoAddItem from './AddTodo'
 import TodoItem from './TodoItem'
 
 const TodoLead = (props) => {

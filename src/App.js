@@ -9,7 +9,7 @@ import { v1 as uuid } from "uuid"
 
 import Home from "./components/Home/Home"
 import Login from "./components/Login/Login"
-import Todo from "./components/Todo/Todo.js"
+import Todos from "./components/Todos/Todos.js"
 import Layout from "./components/Layout/Layout"
 
 class App extends Component {
@@ -108,7 +108,7 @@ class App extends Component {
 				<Router className="d-flex flex-column flex-grow-1">
 					<Home path="/" />
 					<Login path="/login" firebaseUiConfig={firebaseUiConfig} firebaseAuth={firebase.auth} />
-					<Todo
+					<Todos
 						path="/todos"
 						todos={this.state.todos}
 						toggleTodoCompletion={this.toggleTodoCompletion}
