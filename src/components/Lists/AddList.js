@@ -28,7 +28,7 @@ export default class AddList extends Component {
 
 	render() {
 		return (
-			<div className="input-group mx-auto bg-warning">
+			<div className="input-group mx-auto bg-light">
 				<div className="input-group-prepend">
 					<button className="btn" disabled>
 						<FaPlus size={".75rem"} />
@@ -36,13 +36,14 @@ export default class AddList extends Component {
 				</div>
 				<input
 					type="text"
-					className="col-10 border-0 bg-transparent"
+					className="col-10 border-0 bg-transparent px-0"
 					id="task"
 					placeholder="New List"
 					onChange={e => this.onChangeDescription(e)}
 					onBlur={e => this.onBlur(e)}
 					onKeyDown={e => this.onKeyDown(e)}
 					value={this.state.description}
+					autocomplete="off"
 				/>
 			</div>
 		)

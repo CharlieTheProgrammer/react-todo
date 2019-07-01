@@ -4,7 +4,7 @@ import List from './List'
 
 export default function Lists(props) {
 	return (
-		<div className="col-4 border py-5 px-0">
+		<div className="col-12 col-sm-4 col-md-4 col-lg-3 py-5 px-0">
 			{
 				props.lists.length > 0 && (
 					props.lists.map(list => {
@@ -12,6 +12,7 @@ export default function Lists(props) {
 							<List
 								list={list}
 								editListName={props.editListName}
+								deleteList={props.deleteList}
 								key={list.id}
 							></List>
 						)

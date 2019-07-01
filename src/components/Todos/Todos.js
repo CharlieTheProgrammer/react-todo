@@ -11,17 +11,10 @@ const TodoLead = (props) => {
         </small>
     )
 }
-const imgStyle = {
-    borderRadius: "10px"
-}
 
 const Todo = (props) => {
     return (
-        <div className="card bg-light col-12 col-md-8 col-lg-6 mx-auto">
-            <section className="d-flex justify-content-between align-content-center">
-                <h2 className="m-0 p-0">Welcome {props.user.displayName}</h2>
-                <img src={props.user.photoURL} alt="" width="50px" height="50px" style={imgStyle} />
-            </section>
+        <div className="card bg-light col-12 col-sm-8 col-md-8 mx-auto">
             <h1>Today</h1>
             <TodoLead todos={props.todos}></TodoLead>
             <div className="card-body">
