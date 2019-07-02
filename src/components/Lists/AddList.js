@@ -12,7 +12,7 @@ export default class AddList extends Component {
 
 	onKeyDown = evt => {
 		if (evt.key === "Enter") {
-			this.props.addList(evt)
+			this.props.addList(evt.target.value)
 			this.setState({
 				description: ''
 			})
@@ -20,7 +20,7 @@ export default class AddList extends Component {
 	}
 
 	onBlur = evt => {
-		this.props.addList(evt)
+		this.props.addList(evt.target.value)
 		this.setState({
 			description: ''
 		})
@@ -43,7 +43,7 @@ export default class AddList extends Component {
 					onBlur={e => this.onBlur(e)}
 					onKeyDown={e => this.onKeyDown(e)}
 					value={this.state.description}
-					autocomplete="off"
+					autoComplete="off"
 				/>
 			</div>
 		)

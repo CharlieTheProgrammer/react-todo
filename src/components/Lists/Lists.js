@@ -14,6 +14,8 @@ export default function Lists(props) {
 								editListName={props.editListName}
 								deleteList={props.deleteList}
 								key={list.id}
+								changeSelectedList={props.changeSelectedList}
+								selectedList={props.user.selectedList}
 							></List>
 						)
 					})

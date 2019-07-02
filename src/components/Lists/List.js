@@ -1,10 +1,18 @@
 import React from 'react'
 import { FaList, FaTrashAlt } from "react-icons/fa"
 
+
+// On single-click, select list
+// On double-click set contentEditable.
+// On blur, disable contenEditable and edit list name
 export default function List(props) {
     return (
-        <div className="input-group mx-auto d-flex flex-row">
-            <div className="input-group-prepend">
+        <div
+            className={props.selectedList === props.list.id?
+                "input-group mx-auto d-flex flex-row bg-light":
+                "input-group mx-auto d-flex flex-row"}
+            >
+            <div className="input-group-prepend" onClick={e => props.changeSelectedList(e, props.list.id)}>
                 <button className="btn" disabled>
                     <FaList size={".75rem"} />
                 </button>

@@ -29,9 +29,15 @@ class App extends Component {
 					photoURL: u.photoURL,
 					uid: u.uid
 				}
-				this.setState({ user: currentUser })
 
-				let todosRef = db.collection("todos").doc(`${this.state.user.uid}`)
+				let usersRef = db.collection("users").doc(`${currentUser.uid}`)
+				usersRef.onSnapshot(snapShot => {
+					let data = snapShot.data()
+					this.setState({ user: data })
+				})
+				usersRef.set(currentUser, {merge: true})
+
+				let todosRef = db.collection("todos").doc(`${currentUser.uid}`)
 				todosRef.onSnapshot(snapShot => {
 					let data = snapShot.data()
 					let todos = []
@@ -43,19 +49,22 @@ class App extends Component {
 					}
 				})
 
-				let listsRef = db.collection("lists").doc(`${this.state.user.uid}`)
-				listsRef.onSnapshot(snapShot => {
+				let listsRef = db.collection("lists").doc(`${currentUser.uid}`)
+				listsRef.onSnapshot(async snapShot => {
 					let data = snapShot.data()
 					let lists = []
-					if (data) {
+					if (data && Object.keys(data).length > 0) {
 						for (let key in data) {
 							lists.push(data[key])
 						}
 						this.setState({ lists })
+					} else if (data && Object.keys(data).length === 0) {
+						await this.addList("My List")
+						let listId = this.state.lists[0].id
+						usersRef.set({selectedList: listId}, {merge: true})
 					}
+					navigate("/workspace")
 				})
-
-				navigate("/workspace")
 			}
 		})
 	}
@@ -86,10 +95,12 @@ class App extends Component {
 	}
 
 	addTodo = description => {
+		const listId = this.state.user.selectedList
 		let todo = {
 			id: uuid(),
 			description,
-			done: false
+			done: false,
+			listId
 		}
 
 		let ref = db.collection("todos").doc(`${this.state.user.uid}`)
@@ -127,18 +138,18 @@ class App extends Component {
 		)
 	}
 
-	addList = evt => {
-		if (evt.target.value === "") {
+	addList = async listName => {
+		if (listName === "") {
 			return
 		}
 
 		let list = {
 			id: uuid(),
-			name: evt.target.value
+			name: listName
 		}
 
 		let ref = db.collection("lists").doc(`${this.state.user.uid}`)
-		ref.set(
+		await ref.set(
 			{
 				[list.id]: list
 			},
@@ -147,6 +158,10 @@ class App extends Component {
 	}
 
 	deleteList = listId => {
+		if (this.state.lists.length === 1) {
+			window.alert("You must have at least one todo list.")
+			return
+		}
 		let doDeleteList = window.confirm("Are you sure you want to delete this list? \n\nThis action cannot be undone.")
 
 		if (doDeleteList) {
@@ -156,6 +171,14 @@ class App extends Component {
 			})
 		}
 		return
+	}
+
+	changeSelectedList = (evt, selectedListId) => {
+		evt.preventDefault()
+		let ref = db.collection("users").doc(`${this.state.user.uid}`)
+		ref.set({
+			selectedList: selectedListId
+		}, {merge: true})
 	}
 
 	render() {
@@ -176,6 +199,7 @@ class App extends Component {
 						addList={this.addList}
 						editListName={this.editListName}
 						deleteList={this.deleteList}
+						changeSelectedList={this.changeSelectedList}
 					/>
 				</Router>
 			</Layout>

@@ -13,18 +13,23 @@ const TodoLead = (props) => {
 }
 
 const Todo = (props) => {
+    const {todos} = props
+    const {selectedList} = props.user
+
+    let filteredTodos = todos.filter(todo => todo.listId === selectedList)
+
     return (
         <div className="card bg-light col-12 col-sm-8 col-md-8 mx-auto">
             <h1>Today</h1>
-            <TodoLead todos={props.todos}></TodoLead>
+            <TodoLead todos={filteredTodos}></TodoLead>
             <div className="card-body">
                 <h5 className="card-title">Tasks</h5>
                 <hr />
                 <TodoAddItem addTodo={props.addTodo} />
                 <div className="card-body">
                     {
-                        props.todos.length > 0 && (
-                            props.todos.map(todo => {
+                        filteredTodos.length > 0 && (
+                            filteredTodos.map(todo => {
                                 return (
                                     <TodoItem
                                         todo={todo}
