@@ -14,7 +14,7 @@ export default class AddList extends Component {
 		if (evt.key === "Enter") {
 			this.props.addList(evt.target.value)
 			this.setState({
-				description: ''
+				description: ""
 			})
 		}
 	}
@@ -22,19 +22,20 @@ export default class AddList extends Component {
 	onBlur = evt => {
 		this.props.addList(evt.target.value)
 		this.setState({
-			description: ''
+			description: ""
 		})
 	}
 
 	render() {
 		return (
-			<div className="input-group mx-auto bg-light">
-				<div className="input-group-prepend">
+			<div className="mx-auto d-flex flex-row">
+				<div className="d-flex align-items-center" title="Add list">
 					<button className="btn" disabled>
 						<FaPlus size={".75rem"} />
 					</button>
 				</div>
 				<input
+					title="Enter new list name"
 					type="text"
 					className="col-10 border-0 bg-transparent px-0"
 					id="task"
