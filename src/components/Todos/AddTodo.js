@@ -35,7 +35,7 @@ export default class TodoAdd extends Component {
 						value={this.state.description}
 					/>
 					<div className="input-group-append">
-						<button className="btn btn-outline-primary" onClick={() => this.onSubmit()}>
+						<button className="btn btn-primary" onClick={() => this.onSubmit()}>
 							<FaPlus />
 						</button>
 					</div>

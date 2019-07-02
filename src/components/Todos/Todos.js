@@ -2,10 +2,14 @@ import React from "react"
 import TodoAddItem from './AddTodo'
 import TodoItem from './TodoItem'
 
+const todosStyle ={
+    backgroundColor: '#B8C0AB'
+}
+
 const TodoLead = (props) => {
     const todosLength = props.todos.length
     return (
-        <small className="text-secondary">
+        <small className="text-secondary text-light">
             You have {todosLength > 1 || todosLength === 0 ? todosLength + " tasks " : todosLength + " task "}
             today.
         </small>
@@ -19,14 +23,17 @@ const Todo = (props) => {
     let filteredTodos = todos.filter(todo => todo.listId === selectedList)
 
     return (
-        <div className="card bg-light col-12 col-sm-8 col-md-8 mx-auto">
-            <h1>Today</h1>
+        <div
+            className="d-flex flex-column col-12 col-sm-8 col-md-8 col-lg-9 mx-auto"
+            style={todosStyle}
+            >
+            <h1 className="text-secondary">List name</h1>
             <TodoLead todos={filteredTodos}></TodoLead>
             <div className="card-body">
-                <h5 className="card-title">Tasks</h5>
-                <hr />
                 <TodoAddItem addTodo={props.addTodo} />
-                <div className="card-body">
+                <hr />
+                <h5 className="card-title">Tasks</h5>
+                <div className="card-body pt-2">
                     {
                         filteredTodos.length > 0 && (
                             filteredTodos.map(todo => {

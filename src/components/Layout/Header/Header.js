@@ -3,7 +3,7 @@ import {navigate} from '@reach/router'
 
 const Header = (props) => {
 	return (
-		<div className="d-flex justify-content-between mb-5 px-2">
+		<div className="d-flex justify-content-between px-2">
 			<h1 className="text-secondary pb-1 pt-2 text-center ml-2">
                 <a href="/">YATOP</a>
             </h1>

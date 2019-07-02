@@ -8,12 +8,7 @@ const imgStyle = {
 
 export default function Workspace(props) {
 	return (
-		<div className="d-flex flex-wrap">
-			<section className="col-12 d-flex justify-content-between align-content-center mb-5">
-				<h2 className="m-0 p-0">Welcome {props.user.displayName}</h2>
-				<img src={props.user.photoURL} alt="" width="40px" height="40px" style={imgStyle} />
-			</section>
-
+		<div className="d-flex flex-wrap flex-grow-1">
 			<Lists {...props} />
 			<Todos {...props} />
 		</div>
