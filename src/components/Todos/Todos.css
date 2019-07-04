@@ -1,0 +1,40 @@
+.TodosEnter {
+	opacity: 0;
+}
+
+.TodosOpen {
+	animation: openTodos 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.TodosClose {
+	animation: closeTodos 1s ease-out forwards;
+}
+
+@keyframes openTodos {
+	0% {
+		opacity: 0;
+		transform: translateX(100%);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes closeTodos {
+	0% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	25% {
+		opacity: 1;
+		transform: translateY(20%);
+	}
+
+	100% {
+		opacity: 0;
+		transform: translateY(-100%);
+	}
+}

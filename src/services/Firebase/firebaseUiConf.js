@@ -1,6 +1,7 @@
 import firebase from 'firebase/app'
 
 const firebaseUiConfig = {
+    signInSuccessUrl: '/workspace',
     signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.GithubAuthProvider.PROVIDER_ID,

@@ -16,7 +16,9 @@ class App extends Component {
 	state = {
 		todos: [],
 		lists: [],
-		user: false
+		user: false,
+		areTodosLoaded: false,
+		areListsLoaded: false
 	}
 
 	componentDidMount = () => {
@@ -35,10 +37,11 @@ class App extends Component {
 					let data = snapShot.data()
 					this.setState({ user: data })
 				})
-				usersRef.set(currentUser, {merge: true})
+				usersRef.set(currentUser, { merge: true })
 
 				let todosRef = db.collection("todos").doc(`${currentUser.uid}`)
 				todosRef.onSnapshot(snapShot => {
+					this.setState({ areTodosLoaded: true })
 					let data = snapShot.data()
 					let todos = []
 					if (data) {
@@ -51,6 +54,7 @@ class App extends Component {
 
 				let listsRef = db.collection("lists").doc(`${currentUser.uid}`)
 				listsRef.onSnapshot(async snapShot => {
+					this.setState({ areListsLoaded: true })
 					let data = snapShot.data()
 					let lists = []
 					if (data && Object.keys(data).length > 0) {
@@ -61,9 +65,14 @@ class App extends Component {
 					} else if (data && Object.keys(data).length === 0) {
 						await this.addList("My List")
 						let listId = this.state.lists[0].id
-						usersRef.set({selectedList: listId}, {merge: true})
+						usersRef.set({ selectedList: listId }, { merge: true })
 					}
 					navigate("/workspace")
+				})
+			} else {
+				this.setState({
+					areListsLoaded: false,
+					areTodosLoaded: false,
 				})
 			}
 		})
@@ -120,9 +129,13 @@ class App extends Component {
 	}
 
 	logOut = async () => {
-		navigate("/")
+		await navigate("/")
 		await firebase.auth().signOut()
-		this.setState({ user: null })
+		this.setState({
+			user: null,
+			todos: [],
+			lists: []
+		})
 	}
 
 	editListName = (listId, listName) => {
@@ -178,12 +191,12 @@ class App extends Component {
 		let ref = db.collection("users").doc(`${this.state.user.uid}`)
 		ref.set({
 			selectedList: selectedListId
-		}, {merge: true})
+		}, { merge: true })
 	}
 
 	render() {
 		return (
-			<Layout user={this.state.user} logOut={this.logOut}>
+			<Layout user={this.state.user} logOut={this.logOut} state={this.state}>
 				<Router className="d-flex flex-column flex-grow-1">
 					<Home path="/" />
 					<Login path="/login" firebaseUiConfig={firebaseUiConfig} firebaseAuth={firebase.auth} />
@@ -195,11 +208,14 @@ class App extends Component {
 						deleteTodo={this.deleteTodo}
 						addTodo={this.addTodo}
 						user={this.state.user}
+
 						lists={this.state.lists}
 						addList={this.addList}
 						editListName={this.editListName}
 						deleteList={this.deleteList}
 						changeSelectedList={this.changeSelectedList}
+						areListsLoaded={this.state.areListsLoaded}
+						areTodosLoaded={this.state.areTodosLoaded}
 					/>
 				</Router>
 			</Layout>
