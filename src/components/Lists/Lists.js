@@ -30,9 +30,6 @@ export default function Lists(props) {
 				mountOnEnter
 			>
 				<div
-					style={{
-						opacity: 0
-					}}
 				>
 					<section className=" d-flex align-items-center mt-1 ml-1 mb-2">
 						<img src={props.user.photoURL} alt="" width="40px" height="40px" style={imgStyle} />

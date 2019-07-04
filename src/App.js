@@ -22,8 +22,9 @@ class App extends Component {
 	}
 
 	componentDidMount = () => {
-		firebase.auth().onAuthStateChanged(user => {
+		firebase.auth().onAuthStateChanged(async user => {
 			if (firebase.auth().currentUser) {
+				await navigate("/workspace")
 				let u = firebase.auth().currentUser
 				var currentUser = {
 					displayName: u.displayName,
@@ -67,7 +68,6 @@ class App extends Component {
 						let listId = this.state.lists[0].id
 						usersRef.set({ selectedList: listId }, { merge: true })
 					}
-					navigate("/workspace")
 				})
 			} else {
 				this.setState({
