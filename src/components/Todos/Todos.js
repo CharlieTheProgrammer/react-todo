@@ -26,7 +26,7 @@ const Todo = props => {
 	let filteredTodos = todos.filter(todo => todo.listId === selectedList)
 
 	return (
-		<div className="d-flex flex-column col-12 col-sm-8 col-md-8 col-lg-9 mx-auto" style={todosStyle}>
+		<div className="d-flex flex-column col-sm-8 col-md-8 col-lg-9 mx-auto flex-grow-1" style={todosStyle}>
 			<CSSTransition
 				in={areTodosLoaded}
 				timeout={1000}

@@ -7,7 +7,7 @@
 }
 
 .ListsClose {
-	animation: closeLists 1s ease-out forwards;
+	animation: closeLists 1.1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 @keyframes openLists {
@@ -28,13 +28,8 @@
 		transform: translateY(0);
 	}
 
-	25% {
-		opacity: 1;
-		transform: translateY(20%);
-	}
-
 	100% {
 		opacity: 0;
-		transform: translateY(-100%);
+		transform: translateX(-80%);
 	}
 }
