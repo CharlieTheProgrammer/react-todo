@@ -7,7 +7,7 @@ export default function Loading(props) {
 		case 'sm' : sizeClass = 'spinner-grow-sm'; break;
 		case 'md' : sizeClass = 'spinner-grow-md'; break;
 		case 'lg' : sizeClass = 'spinner-grow-lg'; break;
-		default: return '';
+		default: sizeClass = '';
 	}
 
 	const classes = [
