@@ -16,6 +16,7 @@ class App extends Component {
 	state = {
 		todos: [],
 		lists: [],
+		selectedList: [],
 		user: false,
 		areTodosLoaded: false,
 		areListsLoaded: false
@@ -42,31 +43,33 @@ class App extends Component {
 
 				let todosRef = db.collection("todos").doc(`${currentUser.uid}`)
 				todosRef.onSnapshot(snapShot => {
-					this.setState({ areTodosLoaded: true })
 					let data = snapShot.data()
 					let todos = []
 					if (data) {
 						for (let key in data) {
 							todos.push(data[key])
 						}
-						this.setState({ todos })
+						this.setState({ todos, areTodosLoaded: true })
 					}
 				})
 
 				let listsRef = db.collection("lists").doc(`${currentUser.uid}`)
 				listsRef.onSnapshot(async snapShot => {
-					this.setState({ areListsLoaded: true })
 					let data = snapShot.data()
 					let lists = []
 					if (data && Object.keys(data).length > 0) {
 						for (let key in data) {
 							lists.push(data[key])
+							if (data[key].isSelected) {
+								this.setState({ selectedList: data[key] })
+							}
 						}
-						this.setState({ lists })
+						this.setState({ lists, areListsLoaded: true }, () =>
+							this.migrationTransferSelectedListFromUserToListsCollection(currentUser, lists))
 					} else if (data && Object.keys(data).length === 0) {
-						await this.addList("My List")
-						let listId = this.state.lists[0].id
-						usersRef.set({ selectedList: listId }, { merge: true })
+						let list = await this.addList("My List")
+						list.isSelected = true
+						listsRef.set({ [list.id]: list }, { merge: true })
 					}
 				})
 			} else {
@@ -104,12 +107,12 @@ class App extends Component {
 	}
 
 	addTodo = description => {
-		const listId = this.state.user.selectedList
+		const{ selectedList} = this.state
 		let todo = {
 			id: uuid(),
 			description,
 			done: false,
-			listId
+			listId: selectedList.id
 		}
 
 		let ref = db.collection("todos").doc(`${this.state.user.uid}`)
@@ -119,6 +122,33 @@ class App extends Component {
 			},
 			{ merge: true }
 		)
+	}
+
+	migrationTransferSelectedListFromUserToListsCollection = async (user, lists) => {
+		let userCollGrpRef = db.collectionGroup("users").where('uid', '==', `${user.uid}`)
+		user = await userCollGrpRef.get()
+		user = user.docs[0].data()
+
+		if (user.hasOwnProperty('selectedList')) {
+			const { selectedList } = user
+			let updatedLists = lists.map(list => {
+				list.id === selectedList ? list.isSelected = true : list.isSelected = false
+				return list
+			})
+
+			let jsonLists = {}
+			updatedLists.forEach(list => jsonLists[list.id] = list)
+
+			// Update lists - using await because I definitely want to make sure this
+			// succeeds before next step, which deletes the migration trigger (selectedList on User).
+			let listsRef = db.collection("lists").doc(`${user.uid}`)
+			await listsRef.set(jsonLists, { merge: true })
+
+			// Update user
+			let usersRef = db.collection("users").doc(`${user.uid}`)
+			await usersRef.update({ selectedList: firebase.firestore.FieldValue.delete() })
+		}
+		return
 	}
 
 	deleteTodo = todoId => {
@@ -158,7 +188,8 @@ class App extends Component {
 
 		let list = {
 			id: uuid(),
-			name: listName
+			name: listName,
+			isSelected: false
 		}
 
 		let ref = db.collection("lists").doc(`${this.state.user.uid}`)
@@ -168,6 +199,7 @@ class App extends Component {
 			},
 			{ merge: true }
 		)
+		return list
 	}
 
 	deleteList = listId => {
@@ -188,10 +220,22 @@ class App extends Component {
 
 	changeSelectedList = (evt, selectedListId) => {
 		evt.preventDefault()
-		let ref = db.collection("users").doc(`${this.state.user.uid}`)
-		ref.set({
-			selectedList: selectedListId
-		}, { merge: true })
+		const { lists } = this.state
+		// Update the lists to mark a new one as isSelected
+		let updatedLists = lists.map(list => {
+			list.id === selectedListId ? list.isSelected = true : list.isSelected = false
+			return list
+		})
+
+		// convert array to json object
+		let jsonLists = {}
+		updatedLists.forEach(list => jsonLists[list.id] = list)
+		// Update selectedList to newly selected list
+		this.setState({ selectedList: jsonLists[selectedListId] })
+
+		// Update firebase DB
+		let ref = db.collection("lists").doc(`${this.state.user.uid}`)
+		ref.set(jsonLists, { merge: true })
 	}
 
 	render() {
@@ -209,6 +253,7 @@ class App extends Component {
 						addTodo={this.addTodo}
 						user={this.state.user}
 
+						selectedList={this.state.selectedList}
 						lists={this.state.lists}
 						addList={this.addList}
 						editListName={this.editListName}

@@ -9,7 +9,7 @@ const selectedListStyle = {
 // On blur, disable contenEditable and edit list name
 export default function List(props) {
 	return (
-		<div className="mx-auto d-flex flex-row" style={props.selectedList === props.list.id ? selectedListStyle : null}>
+		<div className="mx-auto d-flex flex-row" style={props.list.isSelected ? selectedListStyle : null}>
 			<div
 				className="d-flex align-items-center"
 				onClick={e => props.changeSelectedList(e, props.list.id)}

@@ -20,15 +20,13 @@ const TodoLead = props => {
 }
 
 const Todo = props => {
-	const { todos, areTodosLoaded } = props
-	const { selectedList } = props.user
-
-	let filteredTodos = todos.filter(todo => todo.listId === selectedList)
+	const { todos, areTodosLoaded, selectedList } = props
+	let filteredTodos = todos.filter(todo => todo.listId === selectedList.id)
 
 	return (
 		<div className="d-flex flex-column col-sm-8 col-md-8 col-lg-9 mx-auto flex-grow-1" style={todosStyle}>
 			<CSSTransition
-				in={areTodosLoaded}
+				in={areTodosLoaded && !!selectedList}
 				timeout={1000}
 				classNames={{
 					enter: "TodosEnter",
@@ -39,7 +37,7 @@ const Todo = props => {
 				mountOnEnter
 			>
 				<div>
-					<h1 className="text-secondary">List name</h1>
+					<h1 className="text-secondary my-2">{props.selectedList.name || (<Loading></Loading>)}</h1>
 					<TodoLead todos={filteredTodos} />
 					<div className="card-body">
 						<TodoAddItem addTodo={props.addTodo} />
@@ -62,7 +60,7 @@ const Todo = props => {
 					</div>
 				</div>
 			</CSSTransition>
-			{!areTodosLoaded && <Loading size={"lg"} />}
+			{(!areTodosLoaded || !selectedList) && <Loading size={"lg"} />}
 		</div>
 	)
 }
