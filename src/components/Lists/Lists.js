@@ -59,7 +59,7 @@ export default class Lists extends Component {
 				>
 					<div>
 						<section className=" d-flex align-items-center mt-1 ml-1 mb-2">
-							<img src={this.props.user.photoURL} alt="" width="40px" height="40px" style={imgStyle} />
+							{this.props.user.photoURL && <img src={this.props.user.photoURL} alt="" width="40px" height="40px" style={imgStyle} />}
 							<p className="m-0 pl-2">{this.props.user.displayName}</p>
 							<IoIosMenu size={"2rem"} className="d-sm-none ml-auto mr-2" onClick={() => this.toggleDisplayList()} />
 						</section>

@@ -50,6 +50,8 @@ class App extends Component {
 							todos.push(data[key])
 						}
 						this.setState({ todos, areTodosLoaded: true })
+					} else {
+						this.setState({ areTodosLoaded: true })
 					}
 				})
 
@@ -66,7 +68,7 @@ class App extends Component {
 						}
 						this.setState({ lists, areListsLoaded: true }, () =>
 							this.migrationTransferSelectedListFromUserToListsCollection(currentUser, lists))
-					} else if (data && Object.keys(data).length === 0) {
+					} else {
 						let list = await this.addList("My List")
 						list.isSelected = true
 						listsRef.set({ [list.id]: list }, { merge: true })
