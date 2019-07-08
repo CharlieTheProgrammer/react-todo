@@ -1,4 +1,6 @@
 import React, { Component } from "react"
+import FirebaseContext from "../../services/Firebase/context"
+import { v1 as uuid } from "uuid"
 import AddList from "./AddList"
 import List from "./List"
 import Loading from "../Loading/Loading"
@@ -15,8 +17,12 @@ const imgStyle = {
 
 export default class Lists extends Component {
 	state = {
-		displayList: true
+		lists: [],
+		displayList: true,
+		areListsLoaded: false
 	}
+
+	static contextType = FirebaseContext
 
 	toggleDisplayList = () => {
 		this.setState({
@@ -34,16 +40,94 @@ export default class Lists extends Component {
 	}
 
 	componentDidMount() {
+		this.setState({ areListsLoaded: false })
 		this.handleWindowResize() // Running this at mount to initialize displayList
 		window.addEventListener("resize", this.handleWindowResize)
+
+		this.offSnapshot = this.context.lists(this.props.uid).onSnapshot(async snapShot => {
+			let data = snapShot.data()
+			let lists = []
+			if (data && Object.keys(data).length > 0) {
+				for (let key in data) {
+					lists.push(data[key])
+					if (data[key].isSelected) {
+						this.props.shareSelectedList(data[key])
+					}
+				}
+				this.setState({ lists, areListsLoaded: true })
+			} else {
+				let list = await this.addList("My List")
+				list.isSelected = true
+				this.context.lists(this.props.uid).set({ [list.id]: list }, { merge: true })
+			}
+		})
 	}
 
 	componentWillUnmount() {
 		window.removeEventListener("resize", this.handleWindowResize)
+		this.offSnapshot()
+	}
+
+	editListName = (listId, listName) => {
+		let list = this.state.lists.filter(list => (list.id === listId ? list : false))
+		list[0].name = listName
+
+		this.context.lists(this.props.uid).set(
+			{
+				[listId]: list[0]
+			},
+			{ merge: true }
+		)
+	}
+
+	addList = async listName => {
+		if (listName === "") {
+			return
+		}
+
+		let list = {
+			id: uuid(),
+			name: listName,
+			isSelected: false
+		}
+
+		await this.context.lists(this.props.uid).set({ [list.id]: list }, { merge: true })
+		return list
+	}
+
+	deleteList = listId => {
+		if (this.state.lists.length === 1) {
+			window.alert("You must have at least one todo list.")
+			return
+		}
+		let doDeleteList = window.confirm("Are you sure you want to delete this list? \n\nThis action cannot be undone.")
+
+		if (doDeleteList) {
+			this.context.lists(this.props.uid).update({
+				[listId]: this.context.deleteField()
+			})
+		}
+		return
+	}
+
+	changeSelectedList = selectedListId => {
+		const { lists } = this.state
+		// Update the lists to mark a new one as isSelected
+		let updatedLists = lists.map(list => {
+			list.id === selectedListId ? (list.isSelected = true) : (list.isSelected = false)
+			return list
+		})
+
+		// convert array to json object
+		let jsonLists = {}
+		updatedLists.forEach(list => (jsonLists[list.id] = list))
+
+		// Update firebase DB
+		this.context.lists(this.props.uid).set(jsonLists, { merge: true })
 	}
 
 	render() {
-		const { areListsLoaded } = this.props
+		const { areListsLoaded, lists } = this.state
 		return (
 			<div className="col-sm-4 col-md-4 col-lg-3 px-0" style={listsStyles}>
 				<CSSTransition
@@ -59,7 +143,9 @@ export default class Lists extends Component {
 				>
 					<div>
 						<section className=" d-flex align-items-center mt-1 ml-1 mb-2">
-							{this.props.user.photoURL && <img src={this.props.user.photoURL} alt="" width="40px" height="40px" style={imgStyle} />}
+							{this.props.user.photoURL && (
+								<img src={this.props.user.photoURL} alt="" width="40px" height="40px" style={imgStyle} />
+							)}
 							<p className="m-0 pl-2">{this.props.user.displayName}</p>
 							<IoIosMenu size={"2rem"} className="d-sm-none ml-auto mr-2" onClick={() => this.toggleDisplayList()} />
 						</section>
@@ -77,20 +163,19 @@ export default class Lists extends Component {
 							mountOnEnter
 						>
 							<div>
-								{this.props.lists.length > 0 &&
-									this.props.lists.map(list => {
+								{lists.length > 0 &&
+									lists.map(list => {
 										return (
 											<List
 												list={list}
-												editListName={this.props.editListName}
-												deleteList={this.props.deleteList}
+												editListName={this.editListName}
+												deleteList={this.deleteList}
 												key={list.id}
-												changeSelectedList={this.props.changeSelectedList}
-												selectedList={this.props.user.selectedList}
+												changeSelectedList={this.changeSelectedList}
 											/>
 										)
 									})}
-								<AddList addList={this.props.addList} />
+								<AddList addList={this.addList} />
 							</div>
 						</CSSTransition>
 					</div>

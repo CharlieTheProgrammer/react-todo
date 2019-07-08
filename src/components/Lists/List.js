@@ -12,7 +12,7 @@ export default function List(props) {
 		<div className="mx-auto d-flex flex-row" style={props.list.isSelected ? selectedListStyle : null}>
 			<div
 				className="d-flex align-items-center"
-				onClick={e => props.changeSelectedList(e, props.list.id)}
+				onClick={() => props.changeSelectedList(props.list.id)}
 				title="Select list"
 			>
 				<button className="btn" disabled>
@@ -29,7 +29,7 @@ export default function List(props) {
 			>
 				{props.list.name}
 			</div>
-			<button className="btn text-danger" onClick={e => props.deleteList(props.list.id)} title="Delete list">
+			<button className="btn text-danger" onClick={() => props.deleteList(props.list.id)} title="Delete list">
 				<FaTrashAlt size={".75rem"} />
 			</button>
 		</div>
