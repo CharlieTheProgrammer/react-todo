@@ -1,6 +1,7 @@
 import firebase from 'firebase/app'
-import 'firebase/database'
 import 'firebase/auth'
+import 'firebase/firestore'
+import FirebaseContext from './context'
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -12,8 +13,70 @@ const firebaseConfig = {
     appId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID
 };
 
-firebase.initializeApp(firebaseConfig)
 
-export const auth = firebase.auth()
+const firebaseUiConfig = {
+    signInSuccessUrl: '/workspace', // TODO this is what's probably causing workspace to be rendered twice.
+    signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.GithubAuthProvider.PROVIDER_ID,
+        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        // firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+        // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        // firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+        // firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+    ],
+    signInFlow: 'popup',
+    // tosUrl and privacyPolicyUrl accept either url string or a callback
+    // function.
+    // Terms of service url/callback.
+    tosUrl: '<your-tos-url>',
+    // Privacy policy url/callback.
+    privacyPolicyUrl: function () {
+        window.location.assign('<your-privacy-policy-url>');
+    }
+}
+ 
 
-export default firebase
+class Firebase {
+    constructor() {
+        firebase.initializeApp(firebaseConfig)
+        this.auth = firebase.auth()
+        this.db = firebase.firestore()
+        this.uid = false
+        this.uiConfig = firebaseUiConfig
+    }
+
+    getFirebaseUiConfig = () => {
+        return firebaseUiConfig
+    }
+
+    setUid = (uid) => {
+        this.uid = uid
+    }
+
+    isUidSet = () => {
+        if (!this.uid) {
+            return false
+        }
+        return true
+    }
+
+    // *** Helpers ***
+    deleteField = () => firebase.firestore.FieldValue.delete()
+
+    // *** User API ***
+    user = (uid) => {
+        //if(!this.uid) throw Error("Uid must be set before accessing user.")
+        return this.db.collection('users').doc(uid)
+    }
+
+    // *** Lists API ***
+    lists = (uid) => this.db.collection('lists').doc(uid)
+
+    // *** Todos API ***
+    todos = (uid) => this.db.collection('todos').doc(uid)
+
+}
+
+export default Firebase
+export { FirebaseContext }

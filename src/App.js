@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import "./App.css"
-import firebase from "./services/Firebase/firebase"
-import firebaseUiConfig from "./services/Firebase/firebaseUiConf"
-import db from "./services/Firebase/firestore"
+
+
+import FirebaseContext from "./services/Firebase/context";
 
 import { Router, navigate } from "@reach/router"
 import { v1 as uuid } from "uuid"
@@ -22,11 +22,13 @@ class App extends Component {
 		areListsLoaded: false
 	}
 
+	static contextType = FirebaseContext
+
 	componentDidMount = () => {
-		firebase.auth().onAuthStateChanged(async user => {
-			if (firebase.auth().currentUser) {
+		this.context.auth.onAuthStateChanged(async user => {
+			if (this.context.auth.currentUser) {
 				await navigate("/workspace")
-				let u = firebase.auth().currentUser
+				let u = this.context.auth.currentUser
 				var currentUser = {
 					displayName: u.displayName,
 					email: u.email,
@@ -34,15 +36,13 @@ class App extends Component {
 					uid: u.uid
 				}
 
-				let usersRef = db.collection("users").doc(`${currentUser.uid}`)
-				usersRef.onSnapshot(snapShot => {
+				this.context.user(currentUser.uid).onSnapshot(snapShot => {
 					let data = snapShot.data()
 					this.setState({ user: data })
 				})
-				usersRef.set(currentUser, { merge: true })
+				this.context.user(currentUser.uid).set(currentUser, { merge: true })
 
-				let todosRef = db.collection("todos").doc(`${currentUser.uid}`)
-				todosRef.onSnapshot(snapShot => {
+				this.context.todos(currentUser.uid).onSnapshot(snapShot => {
 					let data = snapShot.data()
 					let todos = []
 					if (data) {
@@ -55,8 +55,7 @@ class App extends Component {
 					}
 				})
 
-				let listsRef = db.collection("lists").doc(`${currentUser.uid}`)
-				listsRef.onSnapshot(async snapShot => {
+				this.context.lists(currentUser.uid).onSnapshot(async snapShot => {
 					let data = snapShot.data()
 					let lists = []
 					if (data && Object.keys(data).length > 0) {
@@ -71,7 +70,7 @@ class App extends Component {
 					} else {
 						let list = await this.addList("My List")
 						list.isSelected = true
-						listsRef.set({ [list.id]: list }, { merge: true })
+						this.context.lists(currentUser.uid).set({ [list.id]: list }, { merge: true })
 					}
 				})
 			} else {
@@ -86,8 +85,7 @@ class App extends Component {
 	toggleTodoCompletion = (evt, todoId) => {
 		let todo = this.state.todos.filter(todo => (todo.id === todoId ? todo : false))
 		todo[0].done = !todo[0].done
-		let ref = db.collection("todos").doc(`${this.state.user.uid}`)
-		ref.set(
+		this.context.todos(this.state.user.uid).set(
 			{
 				[todoId]: todo[0]
 			},
@@ -99,8 +97,7 @@ class App extends Component {
 		let todo = this.state.todos.filter(todo => (todo.id === todoId ? todo : false))
 		todo[0].description = description
 
-		let ref = db.collection("todos").doc(`${this.state.user.uid}`)
-		ref.set(
+		this.context.todos(this.state.user.uid).set(
 			{
 				[todoId]: todo[0]
 			},
@@ -117,8 +114,7 @@ class App extends Component {
 			listId: selectedList.id
 		}
 
-		let ref = db.collection("todos").doc(`${this.state.user.uid}`)
-		ref.set(
+		this.context.todos(this.state.user.uid).set(
 			{
 				[todo.id]: todo
 			},
@@ -127,7 +123,7 @@ class App extends Component {
 	}
 
 	migrationTransferSelectedListFromUserToListsCollection = async (user, lists) => {
-		let userCollGrpRef = db.collectionGroup("users").where('uid', '==', `${user.uid}`)
+		let userCollGrpRef = this.context.db.collectionGroup("users").where('uid', '==', `${user.uid}`)
 		user = await userCollGrpRef.get()
 		user = user.docs[0].data()
 
@@ -143,26 +139,23 @@ class App extends Component {
 
 			// Update lists - using await because I definitely want to make sure this
 			// succeeds before next step, which deletes the migration trigger (selectedList on User).
-			let listsRef = db.collection("lists").doc(`${user.uid}`)
-			await listsRef.set(jsonLists, { merge: true })
+			await this.context.lists(this.state.user.uid).set(jsonLists, { merge: true })
 
 			// Update user
-			let usersRef = db.collection("users").doc(`${user.uid}`)
-			await usersRef.update({ selectedList: firebase.firestore.FieldValue.delete() })
+			await this.context.user(this.state.user.uid).update({ selectedList: this.context.deleteField() })
 		}
 		return
 	}
 
 	deleteTodo = todoId => {
-		let ref = db.collection("todos").doc(`${this.state.user.uid}`)
-		ref.update({
-			[todoId]: firebase.firestore.FieldValue.delete()
+		this.context.todos(this.state.user.uid).update({
+			[todoId]: this.context.deleteField()
 		})
 	}
 
 	logOut = async () => {
 		await navigate("/")
-		await firebase.auth().signOut()
+		await this.context.auth.signOut()
 		this.setState({
 			user: null,
 			todos: [],
@@ -174,8 +167,7 @@ class App extends Component {
 		let list = this.state.lists.filter(list => (list.id === listId ? list : false))
 		list[0].name = listName
 
-		let ref = db.collection("lists").doc(`${this.state.user.uid}`)
-		ref.set(
+		this.context.lists(this.state.user.uid).set(
 			{
 				[listId]: list[0]
 			},
@@ -194,8 +186,7 @@ class App extends Component {
 			isSelected: false
 		}
 
-		let ref = db.collection("lists").doc(`${this.state.user.uid}`)
-		await ref.set(
+		await this.context.lists(this.state.user.uid).set(
 			{
 				[list.id]: list
 			},
@@ -212,9 +203,8 @@ class App extends Component {
 		let doDeleteList = window.confirm("Are you sure you want to delete this list? \n\nThis action cannot be undone.")
 
 		if (doDeleteList) {
-			let ref = db.collection("lists").doc(`${this.state.user.uid}`)
-			ref.update({
-				[listId]: firebase.firestore.FieldValue.delete()
+			this.context.lists(this.state.user.uid).update({
+				[listId]: this.context.deleteField()
 			})
 		}
 		return
@@ -236,8 +226,7 @@ class App extends Component {
 		this.setState({ selectedList: jsonLists[selectedListId] })
 
 		// Update firebase DB
-		let ref = db.collection("lists").doc(`${this.state.user.uid}`)
-		ref.set(jsonLists, { merge: true })
+		this.context.lists(this.state.user.uid).set(jsonLists, { merge: true })
 	}
 
 	render() {
@@ -245,7 +234,7 @@ class App extends Component {
 			<Layout user={this.state.user} logOut={this.logOut} state={this.state}>
 				<Router className="d-flex flex-column flex-grow-1">
 					<Home path="/" />
-					<Login path="/login" firebaseUiConfig={firebaseUiConfig} firebaseAuth={firebase.auth} />
+					<Login path="/login" />
 					<Workspace
 						path="/workspace"
 						todos={this.state.todos}
