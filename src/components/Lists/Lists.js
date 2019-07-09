@@ -6,42 +6,31 @@ import List from "./List"
 import Loading from "../Loading/Loading"
 import { CSSTransition } from "react-transition-group"
 import "./Lists.css"
-import { IoIosMenu } from "react-icons/io"
+import { IoIosMenu, IoIosClose, IoIosSearch } from "react-icons/io"
 const listsStyles = {
 	backgroundColor: "#FAF9F8"
 }
 
 const imgStyle = {
-	borderRadius: "35px"
+	borderRadius: "35px",
+	width: "40px",
+	height: "40px"
 }
 
 export default class Lists extends Component {
 	state = {
 		lists: [],
-		displayList: true,
-		areListsLoaded: false
+		displayListOnMobile: false,
+		areListsLoaded: false,
+		isSearchBarFocused: false,
+		listNavClasses: ["px-0"]
 	}
 
 	static contextType = FirebaseContext
 
-	toggleDisplayList = () => {
-		this.setState({
-			displayList: !this.state.displayList
-		})
-	}
-
-	handleWindowResize = () => {
-		// This is BS4 XS breakpoint
-		if (window.innerWidth > 576) {
-			this.setState({ displayList: true })
-		} else {
-			this.setState({ displayList: false })
-		}
-	}
-
 	componentDidMount() {
 		this.setState({ areListsLoaded: false })
-		this.handleWindowResize() // Running this at mount to initialize displayList
+		this.handleWindowResize() // Running this at mount to initialize isMobileScreen
 		window.addEventListener("resize", this.handleWindowResize)
 
 		this.offSnapshot = this.context.lists(this.props.uid).onSnapshot(async snapShot => {
@@ -126,10 +115,83 @@ export default class Lists extends Component {
 		this.context.lists(this.props.uid).set(jsonLists, { merge: true })
 	}
 
-	render() {
-		const { areListsLoaded, lists } = this.state
+	toggleDisplayListOnMobileScreen = () => {
+		this.setState({
+			displayListOnMobile: !this.state.displayListOnMobile
+		})
+	}
+
+	handleWindowResize = () => {
+		// This is BS4 XS breakpoint
+		if (window.innerWidth > 576) {
+			this.setState({ displayListOnMobile: true })
+		} else {
+			let updatedClasses = this.state.listNavClasses.map(listNavclass => listNavclass !== "collapsed")
+			this.setState({ displayListOnMobile: false, listNavClasses: updatedClasses })
+		}
+	}
+
+	toggleSearchBarFocus = () => {
+		if (this.state.isSearchBarFocused) {
+			this.searchInput.blur()
+		} else {
+			this.searchInput.focus()
+		}
+		this.setState({ isSearchBarFocused: !this.state.isSearchBarFocused })
+	}
+
+	toggleListNavCollapse = () => {
+		let isListNavCollapsed = this.state.listNavClasses.includes("collapsed")
+
+		if (isListNavCollapsed) {
+			let updatedClasses = this.state.listNavClasses.map(listNavclass => listNavclass !== "collapsed")
+			this.setState({ listNavClasses: updatedClasses })
+		} else {
+			let updatedClasses = this.state.listNavClasses.slice(0)
+			updatedClasses.push("collapsed")
+			this.setState({ listNavClasses: updatedClasses })
+		}
+	}
+
+	SearchBar = () => {
+		const {isSearchBarFocused} =  this.state
+
 		return (
-			<div className="col-sm-4 col-md-4 col-lg-3 px-0" style={listsStyles}>
+			<section className="d-flex justify-content-between align-items-center">
+				<div className="ml-2 mr-1 pointerOnHover">
+					<IoIosMenu size={"2rem"} className="d-none d-sm-block" onClick={() => this.toggleListNavCollapse()} />
+					<IoIosMenu size={"2rem"} className="d-sm-none" onClick={() => this.toggleDisplayListOnMobileScreen()} />
+				</div>
+				<div className="lists-nav-searchbar w-100 px-2">
+					<input type="text" className="w-100" name="search" id="search" ref={search => (this.searchInput = search)} />
+				</div>
+				<div className="lists-nav-searchbar-focustoggle mx-1 pointerOnHover">
+					{isSearchBarFocused ? (
+						<IoIosClose size={"2rem"} onClick={() => this.toggleSearchBarFocus()} />
+					) : (
+						<IoIosSearch size={"2rem"} onClick={() => this.toggleSearchBarFocus()} />
+					)}
+				</div>
+			</section>
+		)
+	}
+
+	UserToolBar = () => {
+		const { displayName, photoURL } = this.props.user
+
+		return (
+			<section className=" d-flex align-items-center mt-1 ml-1 mb-2">
+				{photoURL && <img src={photoURL} alt="You" className="mx-1" style={imgStyle} />}
+				<p className="lists-nav-displayname m-0 pl-2">{displayName}</p>
+			</section>
+		)
+	}
+
+	render() {
+		const { areListsLoaded, lists, listNavClasses, displayListOnMobile } = this.state
+
+		return (
+			<div id="lists-nav" className={listNavClasses.join(" ")} style={listsStyles}>
 				<CSSTransition
 					in={areListsLoaded}
 					timeout={1000}
@@ -142,16 +204,11 @@ export default class Lists extends Component {
 					mountOnEnter
 				>
 					<div>
-						<section className=" d-flex align-items-center mt-1 ml-1 mb-2">
-							{this.props.user.photoURL && (
-								<img src={this.props.user.photoURL} alt="" width="40px" height="40px" style={imgStyle} />
-							)}
-							<p className="m-0 pl-2">{this.props.user.displayName}</p>
-							<IoIosMenu size={"2rem"} className="d-sm-none ml-auto mr-2" onClick={() => this.toggleDisplayList()} />
-						</section>
+						{this.SearchBar()}
+						{this.UserToolBar()}
 						<CSSTransition
-							in={this.state.displayList}
-							timeout={800}
+							in={displayListOnMobile}
+							timeout={1000}
 							classNames={{
 								enter: "ListsEnter",
 								enterActive: "ListsOpen",
@@ -163,19 +220,21 @@ export default class Lists extends Component {
 							mountOnEnter
 						>
 							<div>
-								{lists.length > 0 &&
-									lists.map(list => {
-										return (
-											<List
-												list={list}
-												editListName={this.editListName}
-												deleteList={this.deleteList}
-												key={list.id}
-												changeSelectedList={this.changeSelectedList}
-											/>
-										)
-									})}
-								<AddList addList={this.addList} />
+								<div className="lists-nav-lists">
+									{lists.length > 0 &&
+										lists.map(list => {
+											return (
+												<List
+													list={list}
+													editListName={this.editListName}
+													deleteList={this.deleteList}
+													key={list.id}
+													changeSelectedList={this.changeSelectedList}
+												/>
+											)
+										})}
+									<AddList addList={this.addList} />
+								</div>
 							</div>
 						</CSSTransition>
 					</div>

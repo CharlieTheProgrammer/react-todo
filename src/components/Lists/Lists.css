@@ -33,3 +33,16 @@
 		transform: translateX(-80%);
 	}
 }
+
+#lists-nav.collapsed {
+	width: 55px;
+	overflow: hidden;
+}
+
+#lists-nav.collapsed .lists-nav-searchbar,
+#lists-nav.collapsed .lists-nav-searchbar-focustoggle,
+#lists-nav.collapsed .lists-nav-displayname,
+#lists-nav.collapsed .lists-nav-lists {
+	display: none;
+	opacity: 0;
+}

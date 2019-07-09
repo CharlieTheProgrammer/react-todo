@@ -15,9 +15,7 @@ export default function List(props) {
 				onClick={() => props.changeSelectedList(props.list.id)}
 				title="Select list"
 			>
-				<button className="btn" disabled>
-					<FaList size={".75rem"} />
-				</button>
+				<FaList size={"1rem"} className="mx-3 pointerOnHover" />
 			</div>
 			<div
 				title="Edit list name"
@@ -30,7 +28,7 @@ export default function List(props) {
 				{props.list.name}
 			</div>
 			<button className="btn text-danger" onClick={() => props.deleteList(props.list.id)} title="Delete list">
-				<FaTrashAlt size={".75rem"} />
+				<FaTrashAlt size={"1rem"} />
 			</button>
 		</div>
 	)

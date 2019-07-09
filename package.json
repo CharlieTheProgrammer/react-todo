@@ -11,6 +11,7 @@
     "react-firebaseui": "^3.1.2",
     "react-icons": "^3.7.0",
     "react-scripts": "3.0.1",
+    "react-transition-group": "^4.2.1",
     "uuid": "^3.3.2"
   },
   "scripts": {
@@ -33,5 +34,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0"
   }
 }

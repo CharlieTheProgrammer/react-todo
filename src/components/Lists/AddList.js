@@ -30,9 +30,7 @@ export default class AddList extends Component {
 		return (
 			<div className="mx-auto d-flex flex-row">
 				<div className="d-flex align-items-center" title="Add list">
-					<button className="btn" disabled>
-						<FaPlus size={".75rem"} />
-					</button>
+					<FaPlus className="pointerOnHover mx-3" size={"1rem"} />
 				</div>
 				<input
 					title="Enter new list name"

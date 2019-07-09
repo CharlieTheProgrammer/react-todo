@@ -6,10 +6,16 @@ import TodoItem from "./TodoItem"
 import Loading from "../Loading/Loading"
 import { CSSTransition } from "react-transition-group"
 import './Todos.css'
+import image from '../../assets/img/eiffel.jpg'
 
-const todosStyle = {
-	backgroundColor: "#B8C0AB"
+const todosBackground = {
+	backgroundColor: "#FFF",
+	backgroundImage: `url(${image})`,
+	backgroundSize: 'cover',
+	backgroundRepeat: 'no-repeat',
+	backgroundPosition: 'center top'
 }
+
 
 const TodoLead = props => {
 	const todosLength = props.todos.length
@@ -99,7 +105,7 @@ export default class Todos extends Component {
 		const { todos, areTodosLoaded } = this.state
 		let filteredTodos = todos.filter(todo => todo.listId === selectedList.id)
 		return (
-			<div className="d-flex flex-column col-sm-8 col-md-8 col-lg-9 mx-auto flex-grow-1" style={todosStyle}>
+			<div className="d-flex flex-column px-3 mx-auto flex-grow-1" style={{...todosBackground, width: '100%'}}>
 				<CSSTransition
 					in={areTodosLoaded && !!selectedList}
 					timeout={1000}
@@ -112,7 +118,7 @@ export default class Todos extends Component {
 					mountOnEnter
 				>
 					<div>
-						<h1 className="text-secondary my-2">{selectedList.name || (<Loading></Loading>)}</h1>
+						<h2 className="text-light my-2">{selectedList.name || (<Loading></Loading>)}</h2>
 						<TodoLead todos={filteredTodos} />
 						<div className="card-body">
 							<TodoAddItem addTodo={this.addTodo} />
