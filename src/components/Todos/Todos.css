@@ -25,16 +25,11 @@
 @keyframes closeTodos {
 	0% {
 		opacity: 1;
-		transform: translateY(0);
-	}
-
-	25% {
-		opacity: 1;
-		transform: translateY(20%);
+		transform: translateX(0);
 	}
 
 	100% {
 		opacity: 0;
-		transform: translateY(-100%);
+		transform: translateX(100%);
 	}
 }

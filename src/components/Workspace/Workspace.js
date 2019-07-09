@@ -13,7 +13,7 @@ export default class Workspace extends Component {
 
 	render() {
 		return (
-			<div className="d-flex flex-column flex-sm-row flex-grow-1">
+			<div className="d-flex flex-column flex-sm-row flex-grow-1 overflow-hidden">
 				<Lists {...this.props} shareSelectedList={this.shareSelectedList} />
 				<Todos {...this.props} selectedList={this.state.selectedList} />
 			</div>
