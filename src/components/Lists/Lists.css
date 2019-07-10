@@ -46,3 +46,17 @@
 	display: none;
 	opacity: 0;
 }
+
+button.btn-list-drawer {
+	background: none;
+	margin: 0;
+	padding: 0;
+	border: none;
+    cursor: pointer;
+	color: #111 ;
+}
+
+button.btn-list-drawer:hover {
+	color: #fff ;
+	background-color: dodgerblue;
+}

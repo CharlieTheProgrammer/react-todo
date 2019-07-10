@@ -2,7 +2,7 @@ import React from "react"
 import { CSSTransition } from "react-transition-group"
 import { FaRegEnvelope, FaPrint } from "react-icons/fa"
 
-const listsMenuStyles = {
+const TodosDrawerStyles = {
 	position: "absolute",
 	right: "-15px",
 	top: "85px",
@@ -16,7 +16,7 @@ export default function TodosDrawer(props) {
 	return (
 		<div>
 			<CSSTransition
-				in={props.showListMenu}
+				in={props.showTodosDrawer}
 				timeout={1000}
 				classNames={{
 					enter: "TodosEnter",
@@ -28,7 +28,7 @@ export default function TodosDrawer(props) {
 				mountOnEnter
 				unmountOnExit
 			>
-				<div id="lists-menu" style={listsMenuStyles}>
+				<div id="lists-menu" style={TodosDrawerStyles}>
 					<ul className="p-0 text-light" style={{ listStyle: "none" }}>
 						<li className="nav-item">
 							<button className="text-light d-flex align-items-center link w-100">

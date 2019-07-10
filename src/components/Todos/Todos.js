@@ -32,7 +32,7 @@ export default class Todos extends Component {
 	state = {
 		todos: [],
 		areTodosLoaded: false,
-		showListMenu: false
+		showTodosDrawer: false
 	}
 
 	static contextType = FirebaseContext
@@ -103,7 +103,7 @@ export default class Todos extends Component {
 	}
 
 	toggleListMenu = () => {
-		this.setState({ showListMenu: !this.state.showListMenu })
+		this.setState({ showTodosDrawer: !this.state.showTodosDrawer })
 	}
 
 	render() {
@@ -131,7 +131,7 @@ export default class Todos extends Component {
 							</div>
 							<div className="text-light">
 								<FaEllipsisH className="pointerOnHover" size={"1.5rem"} onClick={() => this.toggleListMenu()} />
-								<TodosDrawer showListMenu={this.state.showListMenu} />
+								<TodosDrawer showTodosDrawer={this.state.showTodosDrawer} />
 							</div>
 						</div>
 						<div className="card-body">

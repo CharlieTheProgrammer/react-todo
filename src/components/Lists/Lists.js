@@ -3,18 +3,13 @@ import FirebaseContext from "../../services/Firebase/context"
 import { v1 as uuid } from "uuid"
 import AddList from "./AddList"
 import List from "./List"
+import UserToolBar from "./UserToolBar"
 import Loading from "../Loading/Loading"
 import { CSSTransition } from "react-transition-group"
 import "./Lists.css"
-import { IoIosMenu, IoIosClose, IoIosSearch } from "react-icons/io"
+
 const listsStyles = {
 	backgroundColor: "#FAF9F8"
-}
-
-const imgStyle = {
-	borderRadius: "35px",
-	width: "40px",
-	height: "40px"
 }
 
 export default class Lists extends Component {
@@ -23,7 +18,8 @@ export default class Lists extends Component {
 		displayListOnMobile: false,
 		areListsLoaded: false,
 		isSearchBarFocused: false,
-		listNavClasses: ["px-0"]
+		listNavClasses: ["px-0", "pt-2"],
+		showListsDrawer: false
 	}
 
 	static contextType = FirebaseContext
@@ -131,13 +127,17 @@ export default class Lists extends Component {
 		}
 	}
 
-	toggleSearchBarFocus = () => {
+	toggleSearchBarFocus = (searchInput) => {
 		if (this.state.isSearchBarFocused) {
-			this.searchInput.blur()
+			searchInput.blur()
 		} else {
-			this.searchInput.focus()
+			searchInput.focus()
 		}
 		this.setState({ isSearchBarFocused: !this.state.isSearchBarFocused })
+	}
+
+	toggleShowListsDrawer = () => {
+		this.setState({ showListsDrawer: !this.state.showListsDrawer })
 	}
 
 	toggleListNavCollapse = () => {
@@ -153,39 +153,6 @@ export default class Lists extends Component {
 		}
 	}
 
-	SearchBar = () => {
-		const {isSearchBarFocused} =  this.state
-
-		return (
-			<section className="d-flex justify-content-between align-items-center">
-				<div className="ml-2 mr-1 pointerOnHover">
-					<IoIosMenu size={"2rem"} className="d-none d-sm-block" onClick={() => this.toggleListNavCollapse()} />
-					<IoIosMenu size={"2rem"} className="d-sm-none" onClick={() => this.toggleDisplayListOnMobileScreen()} />
-				</div>
-				<div className="lists-nav-searchbar w-100 px-2">
-					<input type="text" className="w-100" name="search" id="search" ref={search => (this.searchInput = search)} />
-				</div>
-				<div className="lists-nav-searchbar-focustoggle mx-1 pointerOnHover">
-					{isSearchBarFocused ? (
-						<IoIosClose size={"2rem"} onClick={() => this.toggleSearchBarFocus()} />
-					) : (
-						<IoIosSearch size={"2rem"} onClick={() => this.toggleSearchBarFocus()} />
-					)}
-				</div>
-			</section>
-		)
-	}
-
-	UserToolBar = () => {
-		const { displayName, photoURL } = this.props.user
-
-		return (
-			<section className=" d-flex align-items-center mt-1 ml-1 mb-2">
-				{photoURL && <img src={photoURL} alt="You" className="mx-1" style={imgStyle} />}
-				<p className="lists-nav-displayname m-0 pl-2">{displayName}</p>
-			</section>
-		)
-	}
 
 	render() {
 		const { areListsLoaded, lists, listNavClasses, displayListOnMobile } = this.state
@@ -204,8 +171,15 @@ export default class Lists extends Component {
 					mountOnEnter
 				>
 					<div>
-						{this.SearchBar()}
-						{this.UserToolBar()}
+						<UserToolBar
+							user={this.props.user}
+							toggleListsDrawer={this.toggleShowListsDrawer}
+							isSearchBarFocused={this.state.isSearchBarFocused}
+							toggleListNavCollapse={this.toggleListNavCollapse}
+							toggleSearchBarFocus={this.toggleSearchBarFocus}
+							toggleDisplayListOnMobileScreen={this.toggleDisplayListOnMobileScreen}
+							showListsDrawer={this.state.showListsDrawer}
+						/>
 						<CSSTransition
 							in={displayListOnMobile}
 							timeout={1000}
