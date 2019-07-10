@@ -19,7 +19,6 @@ class App extends Component {
 		this.context.auth.onAuthStateChanged(async user => {
 			if (this.context.auth.currentUser) {
 				let u = this.context.auth.currentUser
-				await navigate(`/workspace/${u.uid}`)
 				var currentUser = {
 					displayName: u.displayName,
 					email: u.email,
@@ -32,21 +31,17 @@ class App extends Component {
 					this.setState({ user: data })
 				})
 				this.context.user(currentUser.uid).set(currentUser, { merge: true })
-			}
+			} else {
+				this.setState({
+					user: false
 		})
 	}
-
-	logOut = async () => {
-		await navigate("/")
-		await this.context.auth.signOut()
-		this.setState({
-			user: null
 		})
 	}
 
 	render() {
 		return (
-			<Layout user={this.state.user} logOut={this.logOut} state={this.state}>
+			<Layout user={this.state.user} state={this.state}>
 				<Router className="d-flex flex-column flex-grow-1">
 					<Home path="/" />
 					<Login path="/login" />

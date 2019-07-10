@@ -15,7 +15,6 @@ const firebaseConfig = {
 
 
 const firebaseUiConfig = {
-    signInSuccessUrl: '/workspace', // TODO this is what's probably causing workspace to be rendered twice.
     signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.GithubAuthProvider.PROVIDER_ID,
@@ -33,9 +32,14 @@ const firebaseUiConfig = {
     // Privacy policy url/callback.
     privacyPolicyUrl: function () {
         window.location.assign('<your-privacy-policy-url>');
+    },
+    callbacks: {
+        signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+            window.location.assign(`/workspace/${authResult.user.uid}`)
+        }
     }
 }
- 
+
 
 class Firebase {
     constructor() {
