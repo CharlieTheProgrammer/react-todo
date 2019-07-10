@@ -1,5 +1,6 @@
 import React from "react"
-import { FaList, FaTrashAlt } from "react-icons/fa"
+import { FaTrashAlt } from "react-icons/fa"
+import { IoIosList } from "react-icons/io"
 
 const selectedListStyle = {
 	backgroundColor: "#C9E5FD"
@@ -15,7 +16,7 @@ export default function List(props) {
 				onClick={() => props.changeSelectedList(props.list.id)}
 				title="Select list"
 			>
-				<FaList size={"1rem"} className="mx-3 pointerOnHover" />
+				<IoIosList size={"1.25rem"} className="mx-3 pointerOnHover" />
 			</div>
 			<div
 				title="Edit list name"
@@ -28,7 +29,7 @@ export default function List(props) {
 				{props.list.name}
 			</div>
 			<button className="btn text-danger" onClick={() => props.deleteList(props.list.id)} title="Delete list">
-				<FaTrashAlt size={"1rem"} />
+				<FaTrashAlt size={".75rem"} />
 			</button>
 		</div>
 	)

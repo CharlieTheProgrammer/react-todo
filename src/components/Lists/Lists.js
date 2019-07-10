@@ -7,6 +7,7 @@ import UserToolBar from "./UserToolBar"
 import Loading from "../Loading/Loading"
 import { CSSTransition } from "react-transition-group"
 import "./Lists.css"
+import { navigate } from '@reach/router'
 
 const listsStyles = {
 	backgroundColor: "#FAF9F8"
@@ -153,6 +154,11 @@ export default class Lists extends Component {
 		}
 	}
 
+	logOut = async () => {
+		await navigate("/")
+		await this.context.auth.signOut()
+	}
+
 
 	render() {
 		const { areListsLoaded, lists, listNavClasses, displayListOnMobile } = this.state
@@ -179,6 +185,7 @@ export default class Lists extends Component {
 							toggleSearchBarFocus={this.toggleSearchBarFocus}
 							toggleDisplayListOnMobileScreen={this.toggleDisplayListOnMobileScreen}
 							showListsDrawer={this.state.showListsDrawer}
+							logOut={this.logOut}
 						/>
 						<CSSTransition
 							in={displayListOnMobile}

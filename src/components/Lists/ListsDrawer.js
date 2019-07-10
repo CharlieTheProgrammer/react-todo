@@ -58,7 +58,7 @@ export default function ListsDrawer(props) {
 							</button>
 						</li>
 						<li>
-							<button className="btn-list-drawer text-left px-3 py-2 w-100">
+							<button className="btn-list-drawer text-left px-3 py-2 w-100" onClick={() => props.logOut()}>
 								<span>Sign Out</span>
 							</button>
 						</li>
