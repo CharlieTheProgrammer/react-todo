@@ -107,9 +107,15 @@ export default class Todos extends Component {
 	}
 
 	render() {
-		const { selectedList } = this.props
+		const { selectedList, searchTerm } = this.props
 		const { todos, areTodosLoaded } = this.state
-		let filteredTodos = todos.filter(todo => todo.listId === selectedList.id)
+		let filteredTodos = []
+		if (searchTerm) {
+			filteredTodos = todos.filter(todo => todo.description.toLowerCase().includes(searchTerm.toLowerCase()))
+		} else if (selectedList.id) {
+			filteredTodos = todos.filter(todo => todo.listId === selectedList.id)
+		}
+
 		return (
 			<div className="d-flex flex-column px-3 mx-auto flex-grow-1" style={{ ...todosBackground, width: "100%" }}>
 				<CSSTransition
@@ -126,7 +132,7 @@ export default class Todos extends Component {
 					<div>
 						<div className="d-flex justify-content-between align-items-center">
 							<div>
-								<h2 className="text-light my-2">{selectedList.name || <Loading />}</h2>
+								<h2 className="text-light my-2">{searchTerm || selectedList.name || <Loading />}</h2>
 								<TodoLead todos={filteredTodos} />
 							</div>
 							<div className="text-light">

@@ -130,8 +130,11 @@ export default class Lists extends Component {
 
 	toggleSearchBarFocus = (searchInput) => {
 		if (this.state.isSearchBarFocused) {
+			this.props.updateSearchTerm('')
 			searchInput.blur()
+			searchInput.disabled = true
 		} else {
+			searchInput.disabled = false
 			searchInput.focus()
 		}
 		this.setState({ isSearchBarFocused: !this.state.isSearchBarFocused })
@@ -186,6 +189,8 @@ export default class Lists extends Component {
 							toggleDisplayListOnMobileScreen={this.toggleDisplayListOnMobileScreen}
 							showListsDrawer={this.state.showListsDrawer}
 							logOut={this.logOut}
+							updateSearchTerm={this.props.updateSearchTerm}
+							searchTerm={this.props.searchTerm}
 						/>
 						<CSSTransition
 							in={displayListOnMobile}
