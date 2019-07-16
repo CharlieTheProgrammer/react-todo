@@ -10,7 +10,8 @@ import "./Lists.css"
 import { navigate } from '@reach/router'
 
 const listsStyles = {
-	backgroundColor: "#FAF9F8"
+	backgroundColor: "#FAF9F8",
+	minWidth: '100px'
 }
 
 export default class Lists extends Component {
